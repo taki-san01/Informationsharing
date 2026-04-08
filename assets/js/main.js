@@ -9,13 +9,22 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('data/posts.json')
       .then(res => res.json())
       .then(data => {
-        const localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
+        let localPosts = [];
+        try {
+          localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
+        } catch (e) {
+          console.warn("localStorage is not available (file:// on PC?)", e);
+        }
         postsData = [...localPosts, ...data];
         renderPosts();
       })
       .catch(err => {
         console.error("Failed to load post data", err);
-        const localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
+        let localPosts = [];
+        try {
+          localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
+        } catch (e) {}
+        
         if (localPosts.length > 0) {
           postsData = localPosts;
           renderPosts();
@@ -104,9 +113,14 @@ document.addEventListener('DOMContentLoaded', () => {
         date: new Date().toISOString().split('T')[0]
       };
       
-      const localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
-      localPosts.unshift(newPost);
-      localStorage.setItem('localPosts', JSON.stringify(localPosts));
+      let localPosts = [];
+      try {
+        localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
+        localPosts.unshift(newPost);
+        localStorage.setItem('localPosts', JSON.stringify(localPosts));
+      } catch (e) {
+        alert("PCのローカルファイル(file://)から開いている場合、ブラウザのセキュリティ制限によって投稿が保存されません。GitHub PagesのURLから確認してください。");
+      }
 
       showToast('投稿が完了しました！');
       setTimeout(() => {
