@@ -33,7 +33,7 @@
         <div id="sell-fields">
           <div class="form-group">
             <label>商品名</label>
-            <input type="text" id="sell-title" class="form-control" placeholder="例: ラッカーシンナー" required>
+            <input type="text" id="sell-title" class="form-control" placeholder="例: ラッカーシンナー">
           </div>
           <div class="form-group">
             <label>種類</label>
@@ -121,10 +121,6 @@
               <option>要相談</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>写真 (任意)</label>
-            <input type="file" id="sell-photo" class="form-control" accept="image/*">
-          </div>
         </div>
 
         <!-- 買い特有項目 -->
@@ -209,6 +205,10 @@
         </div>
 
         <!-- 共通項目・後半 -->
+        <div class="form-group">
+          <label>写真 (任意)</label>
+          <input type="file" class="form-control" id="post-photo" accept="image/*">
+        </div>
         <div class="form-group">
           <label>会社名</label>
           <input type="text" class="form-control" id="post-company" placeholder="例: ○○自動車 または ○○モータース" required>

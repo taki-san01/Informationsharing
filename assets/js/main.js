@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1500);
       };
 
-      const photoInput = isSell ? document.getElementById('sell-photo') : null;
+      const photoInput = document.getElementById('post-photo');
       if (photoInput && photoInput.files && photoInput.files[0]) {
         const reader = new FileReader();
         reader.onload = function(evt) {
