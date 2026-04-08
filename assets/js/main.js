@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Fetch posts if we are on the index page
   if (postList) {
-    fetch('data/posts.json')
+    fetch(`data/posts.json?t=${Date.now()}`)
       .then(res => res.json())
       .then(data => {
         let localPosts = [];
@@ -17,7 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
           console.warn("localStorage is not available", e);
         }
-        postsData = [...localPosts, ...data].filter(p => !deletedPosts.includes(p.id));
+        const deletedStrs = deletedPosts.map(String);
+        postsData = [...localPosts, ...data].filter(p => !deletedStrs.includes(String(p.id)));
         renderPosts();
       })
       .catch(err => {
@@ -30,7 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (localPosts.length > 0) {
           let deletedPosts = [];
           try { deletedPosts = JSON.parse(localStorage.getItem('deletedPosts') || '[]'); } catch(e){}
-          postsData = localPosts.filter(p => !deletedPosts.includes(p.id));
+          const deletedStrs = deletedPosts.map(String);
+          postsData = localPosts.filter(p => !deletedStrs.includes(String(p.id)));
           renderPosts();
         } else {
           postList.innerHTML = '<p class="text-center" style="margin-top:30px;">データの読み込みに失敗しました。</p>';
