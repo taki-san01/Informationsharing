@@ -9,12 +9,19 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('data/posts.json')
       .then(res => res.json())
       .then(data => {
-        postsData = data;
+        const localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
+        postsData = [...localPosts, ...data];
         renderPosts();
       })
       .catch(err => {
         console.error("Failed to load post data", err);
-        postList.innerHTML = '<p class="text-center" style="margin-top:30px;">データの読み込みに失敗しました。</p>';
+        const localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
+        if (localPosts.length > 0) {
+          postsData = localPosts;
+          renderPosts();
+        } else {
+          postList.innerHTML = '<p class="text-center" style="margin-top:30px;">データの読み込みに失敗しました。</p>';
+        }
       });
 
     // Sub-tab switching on main page
@@ -61,7 +68,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     postForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      showToast('投稿が完了しました！(デモ)');
+      
+      const type = typeInput.value;
+      const isSell = type === 'sell';
+      
+      let title, quantity, price, region;
+      
+      if (isSell) {
+        const fields = document.getElementById('sell-fields');
+        const inputs = fields.querySelectorAll('input, select');
+        title = inputs[0].value || '名称未設定';
+        quantity = inputs[3].value || '不明';
+        price = inputs[4].value ? inputs[4].value + '円' : '要相談';
+        region = inputs[5].value;
+      } else {
+        const fields = document.getElementById('buy-fields');
+        const inputs = fields.querySelectorAll('input, select');
+        title = inputs[0].value || '名称未設定';
+        quantity = inputs[2].value || '不明';
+        price = inputs[3].value ? inputs[3].value + '円' : '要相談';
+        region = inputs[4].value;
+      }
+      
+      const selects = postForm.querySelectorAll('select');
+      const urgency = selects[selects.length - 1].value;
+      
+      const newPost = {
+        id: Date.now(),
+        type: type,
+        title: title,
+        quantity: quantity,
+        region: region,
+        price: price,
+        urgency: urgency,
+        date: new Date().toISOString().split('T')[0]
+      };
+      
+      const localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
+      localPosts.unshift(newPost);
+      localStorage.setItem('localPosts', JSON.stringify(localPosts));
+
+      showToast('投稿が完了しました！');
       setTimeout(() => {
         window.location.href = 'index.html';
       }, 1500);
