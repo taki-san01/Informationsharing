@@ -128,7 +128,8 @@ document.addEventListener('DOMContentLoaded', () => {
         chat: chat,
         email: email,
         ownerId: myDeviceId,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        createdAt: new Date().getTime()
       };
       
       const completeSubmission = async () => {
