@@ -10,12 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(res => res.json())
       .then(data => {
         let localPosts = [];
+        let deletedPosts = [];
         try {
           localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
+          deletedPosts = JSON.parse(localStorage.getItem('deletedPosts') || '[]');
         } catch (e) {
-          console.warn("localStorage is not available (file:// on PC?)", e);
+          console.warn("localStorage is not available", e);
         }
-        postsData = [...localPosts, ...data];
+        postsData = [...localPosts, ...data].filter(p => !deletedPosts.includes(p.id));
         renderPosts();
       })
       .catch(err => {
@@ -26,7 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {}
         
         if (localPosts.length > 0) {
-          postsData = localPosts;
+          let deletedPosts = [];
+          try { deletedPosts = JSON.parse(localStorage.getItem('deletedPosts') || '[]'); } catch(e){}
+          postsData = localPosts.filter(p => !deletedPosts.includes(p.id));
           renderPosts();
         } else {
           postList.innerHTML = '<p class="text-center" style="margin-top:30px;">データの読み込みに失敗しました。</p>';
@@ -101,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const selects = postForm.querySelectorAll('select');
       const urgency = selects[selects.length - 1].value;
+      const company = document.getElementById('post-company') ? document.getElementById('post-company').value : '';
       
       const newPost = {
         id: Date.now(),
@@ -110,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         region: region,
         price: price,
         urgency: urgency,
+        company: company,
         date: new Date().toISOString().split('T')[0]
       };
       
@@ -186,6 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <h2 style="margin: 10px 0; font-size: 1.3rem;">${post.title}</h2>
       
       <div style="background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+        <p style="margin-bottom: 6px;"><strong>出品者・会社名：</strong> ${post.company || '未設定'}</p>
         <p style="margin-bottom: 6px;"><strong>数量：</strong> ${post.quantity}</p>
         <p style="margin-bottom: 6px;"><strong>地域：</strong> ${post.region}</p>
         <p style="margin-bottom: 6px;"><strong>価格：</strong> ${post.price}</p>
@@ -194,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       <a href="#" class="contact-btn chat" onclick="event.preventDefault(); showToast('Google Chatを開きます(デモ)')">Google Chatで連絡</a>
       <a href="#" class="contact-btn email" onclick="event.preventDefault(); showToast('メールアプリを開きます(デモ)')">メールで連絡</a>
+      <button onclick="deletePost(${post.id})" class="submit-btn" style="background-color: #d32f2f; margin-top: 10px; padding: 10px; font-size: 0.9rem;">この投稿を削除する</button>
     `;
 
     modalOverlay.classList.add('active');
@@ -204,6 +212,25 @@ document.addEventListener('DOMContentLoaded', () => {
     modalOverlay.classList.remove('active');
     document.body.style.overflow = '';
   }
+
+  window.deletePost = function(id) {
+    if(!confirm("本当にこの投稿を削除しますか？")) return;
+    
+    try {
+      let deleted = JSON.parse(localStorage.getItem('deletedPosts') || '[]');
+      deleted.push(id);
+      localStorage.setItem('deletedPosts', JSON.stringify(deleted));
+      
+      let local = JSON.parse(localStorage.getItem('localPosts') || '[]');
+      local = local.filter(p => p.id !== id);
+      localStorage.setItem('localPosts', JSON.stringify(local));
+    } catch(e) {}
+
+    postsData = postsData.filter(p => Number(p.id) !== Number(id));
+    closeModal();
+    renderPosts();
+    showToast('削除しました');
+  };
 
   function showToast(message) {
     let toast = document.getElementById('toast');

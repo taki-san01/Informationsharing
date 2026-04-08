@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>投稿 - 塗料・資材 緊急共有ネット</title>
+  <title>投稿 - 日車協連青年部会　助け合い情報サイト</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
   <header>
     <div>
-      <a href="index.html" class="header-title">塗料・資材 緊急共有ネット</a>
+      <a href="index.html" class="header-title">日車協連青年部会　助け合い情報サイト</a>
     </div>
     <nav class="header-nav">
       <a href="index.html">戻る</a>
@@ -43,6 +43,7 @@
               <option>硬化剤</option>
               <option>パテ</option>
               <option>副資材</option>
+              <option>設備・工具</option>
               <option>その他</option>
             </select>
           </div>
@@ -140,6 +141,7 @@
               <option>硬化剤</option>
               <option>パテ</option>
               <option>副資材</option>
+              <option>設備・工具</option>
               <option>その他</option>
             </select>
           </div>
@@ -208,6 +210,10 @@
 
         <!-- 共通項目・後半 -->
         <div class="form-group">
+          <label>会社名</label>
+          <input type="text" class="form-control" id="post-company" placeholder="例: ○○自動車 または ○○モータース" required>
+        </div>
+        <div class="form-group">
           <label>緊急度</label>
           <select class="form-control">
             <option>通常</option>
@@ -232,7 +238,12 @@
         <button type="submit" class="submit-btn">投稿する</button>
       </form>
     </div>
+    </div>
   </main>
+
+  <footer style="text-align:center; padding: 20px; font-size: 0.8rem; color: #666;">
+    &copy; 日車協連青年部会
+  </footer>
 
   <script src="assets/js/main.js"></script>
 </body>
