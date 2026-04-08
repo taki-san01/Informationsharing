@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 // Initialize Firebase
@@ -129,7 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
         email: email,
         ownerId: myDeviceId,
         date: new Date().toISOString().split('T')[0],
-        createdAt: new Date().getTime()
+        createdAt: new Date().getTime(),
+        status: 'active'
       };
       
       const completeSubmission = async () => {
@@ -202,11 +203,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const badgeText = post.type === 'sell' ? '売り' : '買い';
       const badgeClass = post.type;
 
+      const isResolved = post.status === 'resolved';
+      if (isResolved) {
+        card.style.opacity = '0.7';
+        card.style.backgroundColor = '#f8f9fa';
+      }
+
       card.innerHTML = `
         <div class="card-header">
           <div>
             <span class="badge ${badgeClass}">${badgeText}</span>
-            ${isUrgent ? '<span class="badge urgent">緊急</span>' : ''}
+            ${isUrgent && !isResolved ? '<span class="badge urgent">緊急</span>' : ''}
+            ${isResolved ? '<span class="badge" style="background-color:#9e9e9e; margin-left:8px;">解決済</span>' : ''}
           </div>
           <span class="card-date">${post.date}</span>
         </div>
@@ -232,11 +240,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const emailSubject = encodeURIComponent(`【JABRA CONNECT LINK】投稿について: ${post.title}`);
     const emailBody = encodeURIComponent(`掲示板の投稿（${post.title}）を拝見し、連絡いたしました。\n\n`);
 
+    const isResolved = post.status === 'resolved';
+
     modalBody.innerHTML = `
       <div class="card-header">
         <div>
           <span class="badge ${badgeClass}">${badgeText}</span>
-          ${isUrgent ? '<span class="badge urgent">緊急</span>' : ''}
+          ${isUrgent && !isResolved ? '<span class="badge urgent">緊急</span>' : ''}
+          ${isResolved ? '<span class="badge" style="background-color:#9e9e9e; margin-left:8px;">解決済</span>' : ''}
         </div>
         <span class="card-date">${post.date}</span>
       </div>
@@ -257,9 +268,15 @@ document.addEventListener('DOMContentLoaded', () => {
         ${post.comment ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0;"><p style="white-space: pre-wrap;">${post.comment}</p></div>` : ''}
       </div>
       
-      <button onclick="openChat('${post.chat || ''}')" class="contact-btn chat" style="border:none; cursor:pointer;">Google Chatで連絡</button>
-      <a href="mailto:${post.email || ''}?subject=${emailSubject}&body=${emailBody}" class="contact-btn email">メールで連絡</a>
-      ${post.ownerId === myDeviceId ? `<button onclick="deletePost('${post.firestoreId}')" class="submit-btn" style="background-color: #d32f2f; margin-top: 10px; padding: 10px; font-size: 0.9rem;">この投稿を削除する</button>` : ''}
+      ${!isResolved ? `
+        <button onclick="openChat('${post.chat || ''}')" class="contact-btn chat" style="border:none; cursor:pointer;">Google Chatで連絡</button>
+        <a href="mailto:${post.email || ''}?subject=${emailSubject}&body=${emailBody}" class="contact-btn email">メールで連絡</a>
+        <button onclick="resolvePost('${post.firestoreId}')" class="submit-btn" style="background-color: #78909c; margin-top: 24px; padding: 10px; font-size: 0.9rem; border: dashed 2px #fff;">🤝 解決済みにする (誰でも押せます)</button>
+      ` : `
+        <div style="text-align: center; color: #4CAF50; font-weight: bold; margin-top: 15px; font-size: 1.1rem;">🎉 この件は解決済みです！</div>
+      `}
+
+      ${post.ownerId === myDeviceId ? `<button onclick="deletePost('${post.firestoreId}')" class="submit-btn" style="background-color: #d32f2f; margin-top: 15px; padding: 10px; font-size: 0.9rem;">この投稿を完全に削除する</button>` : ''}
     `;
 
     modalOverlay.classList.add('active');
@@ -272,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.deletePost = async function(firestoreId) {
-    if(!confirm("本当にこの投稿を削除しますか？")) return;
+    if(!confirm("本当にこの投稿を完全に削除しますか？")) return;
     try {
       await deleteDoc(doc(db, "posts", firestoreId));
       closeModal();
@@ -280,6 +297,20 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(err) {
       console.error(err);
       showToast('削除に失敗いたしました。');
+    }
+  };
+
+  window.resolvePost = async function(firestoreId) {
+    if(!confirm("本当に「解決済み」に変更しますか？\n（解決済みにすると自動で連絡ボタンが消え、募集が終了します）")) return;
+    try {
+      await updateDoc(doc(db, "posts", firestoreId), {
+        status: "resolved"
+      });
+      closeModal();
+      showToast('解決済みに変更しました！おめでとうございます！');
+    } catch(err) {
+      console.error(err);
+      showToast('ステータス変更に失敗しました。');
     }
   };
 
