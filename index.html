@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>塗料・資材 緊急共有ネット</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header>
+    <div>
+      <a href="index.html" class="header-title">塗料・資材 緊急共有ネット</a>
+      <div class="header-subtitle">困った時は、仲間で回す。</div>
+    </div>
+    <nav class="header-nav">
+      <a href="rules.html">ルール</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <button class="tab-btn active sell-tab" data-type="sell">売ります</button>
+      <button class="tab-btn buy-tab" data-type="buy">買います</button>
+    </div>
+
+    <!-- Search/Filter UI placeholder for MVP (visual only) -->
+    <div class="filter-bar">
+      <select class="filter-select">
+        <option>地域: 全て</option>
+        <option>愛知県</option>
+        <option>岐阜県</option>
+        <option>三重県</option>
+      </select>
+      <select class="filter-select">
+        <option>種類: 全て</option>
+        <option>塗料</option>
+        <option>シンナー</option>
+        <option>副資材</option>
+      </select>
+      <select class="filter-select">
+        <option>緊急度: 全て</option>
+        <option>緊急</option>
+      </select>
+    </div>
+
+    <div id="post-list" class="post-list">
+      <!-- Posts will be generated here by JavaScript -->
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="post-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div id="close-modal" class="modal-close"></div>
+      <div id="modal-body" class="modal-body">
+        <!-- Content will be injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <a href="post.html" class="fab">＋</a>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

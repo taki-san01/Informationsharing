@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "type": "sell",
+    "title": "シンナー 16L",
+    "quantity": "3缶",
+    "region": "岐阜県",
+    "price": "8,000円/缶",
+    "urgency": "緊急",
+    "date": "2025-04-08"
+  },
+  {
+    "id": 2,
+    "type": "buy",
+    "title": "ラッカーシンナー",
+    "quantity": "2缶希望",
+    "region": "愛知県",
+    "price": "要相談",
+    "urgency": "本日中希望",
+    "date": "2025-04-08"
+  },
+  {
+    "id": 3,
+    "type": "sell",
+    "title": "パテ 4kg",
+    "quantity": "2個",
+    "region": "静岡県",
+    "price": "要相談",
+    "urgency": "通常",
+    "date": "2025-04-07"
+  },
+  {
+    "id": 4,
+    "type": "buy",
+    "title": "塗料用シンナー",
+    "quantity": "未定",
+    "region": "三重県",
+    "price": "要相談",
+    "urgency": "明日まで",
+    "date": "2025-04-07"
+  }
+]

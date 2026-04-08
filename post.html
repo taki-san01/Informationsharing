@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>投稿 - 塗料・資材 緊急共有ネット</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header>
+    <div>
+      <a href="index.html" class="header-title">塗料・資材 緊急共有ネット</a>
+    </div>
+    <nav class="header-nav">
+      <a href="index.html">戻る</a>
+    </nav>
+  </header>
+
+  <main>
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: var(--shadow);">
+      <h2 style="font-size: 1.2rem; margin-bottom: 16px; text-align: center;">新規投稿</h2>
+      
+      <div class="tabs">
+        <button class="tab-btn active sell-tab" data-type="sell">売りたい</button>
+        <button class="tab-btn buy-tab" data-type="buy">買いたい</button>
+      </div>
+
+      <form id="post-form">
+        <input type="hidden" id="post-type" value="sell">
+
+        <!-- 共通項目・売り特有項目 -->
+        <div id="sell-fields">
+          <div class="form-group">
+            <label>商品名</label>
+            <input type="text" class="form-control" placeholder="例: ラッカーシンナー" required>
+          </div>
+          <div class="form-group">
+            <label>種類</label>
+            <select class="form-control">
+              <option>シンナー</option>
+              <option>塗料</option>
+              <option>硬化剤</option>
+              <option>パテ</option>
+              <option>副資材</option>
+              <option>その他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>容量</label>
+            <input type="text" class="form-control" placeholder="例: 16L">
+          </div>
+          <div class="form-group">
+            <label>数量</label>
+            <input type="text" class="form-control" placeholder="例: 3缶">
+          </div>
+          <div class="form-group">
+            <label>価格 (円)</label>
+            <input type="number" class="form-control" placeholder="例: 5000">
+          </div>
+          <div class="form-group">
+            <label>地域</label>
+            <select class="form-control">
+              <option>愛知県</option>
+              <option>岐阜県</option>
+              <option>三重県</option>
+              <option>静岡県</option>
+              <option>その他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>引渡方法</label>
+            <select class="form-control">
+              <option>直接手渡し</option>
+              <option>着払い発送</option>
+              <option>元払い発送</option>
+              <option>要相談</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>写真 (任意)</label>
+            <input type="file" class="form-control" accept="image/*">
+          </div>
+        </div>
+
+        <!-- 買い特有項目 -->
+        <div id="buy-fields" class="hidden">
+          <div class="form-group">
+            <label>欲しいもの (商品名など)</label>
+            <input type="text" class="form-control" placeholder="例: 塗料用シンナー">
+          </div>
+          <div class="form-group">
+            <label>種類</label>
+            <select class="form-control">
+              <option>シンナー</option>
+              <option>塗料</option>
+              <option>硬化剤</option>
+              <option>パテ</option>
+              <option>副資材</option>
+              <option>その他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>希望数量</label>
+            <input type="text" class="form-control" placeholder="例: 1缶〜">
+          </div>
+          <div class="form-group">
+            <label>希望価格 (円)</label>
+            <input type="text" class="form-control" placeholder="例: 相談 (相場程度)">
+          </div>
+          <div class="form-group">
+            <label>地域</label>
+            <select class="form-control">
+              <option>愛知県</option>
+              <option>岐阜県</option>
+              <option>三重県</option>
+              <option>静岡県</option>
+              <option>その他</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 共通項目・後半 -->
+        <div class="form-group">
+          <label>緊急度</label>
+          <select class="form-control">
+            <option>通常</option>
+            <option>緊急</option>
+            <option>本日中希望</option>
+            <option>明日まで希望</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>コメント</label>
+          <textarea class="form-control" rows="3" placeholder="補足や状態など..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Google Chat 連絡先</label>
+          <input type="text" class="form-control" placeholder="アカウント名やリンク等">
+        </div>
+        <div class="form-group">
+          <label>メールアドレス</label>
+          <input type="email" class="form-control" placeholder="例: user@example.com" required>
+        </div>
+
+        <button type="submit" class="submit-btn">投稿する</button>
+      </form>
+    </div>
+  </main>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
