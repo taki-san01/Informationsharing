@@ -220,7 +220,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const badgeText = post.type === 'sell' ? '売り' : '買い';
     const badgeClass = post.type;
 
-    const chatLink = post.chat && post.chat.startsWith('http') ? post.chat : 'https://chat.google.com/';
+    const emailSubject = encodeURIComponent(`【JABRA CONNECT LINK】投稿について: ${post.title}`);
+    const emailBody = encodeURIComponent(`掲示板の投稿（${post.title}）を拝見し、連絡いたしました。\n\n`);
 
     modalBody.innerHTML = `
       <div class="card-header">
@@ -247,8 +248,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ${post.comment ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0;"><p style="white-space: pre-wrap;">${post.comment}</p></div>` : ''}
       </div>
       
-      <a href="${chatLink}" target="_blank" class="contact-btn chat">Google Chatで連絡</a>
-      <a href="mailto:${post.email || ''}" class="contact-btn email">メールで連絡</a>
+      <button onclick="openChat('${post.chat || ''}')" class="contact-btn chat" style="border:none; cursor:pointer;">Google Chatで連絡</button>
+      <a href="mailto:${post.email || ''}?subject=${emailSubject}&body=${emailBody}" class="contact-btn email">メールで連絡</a>
       <button onclick="deletePost(${post.id})" class="submit-btn" style="background-color: #d32f2f; margin-top: 10px; padding: 10px; font-size: 0.9rem;">この投稿を削除する</button>
     `;
 
@@ -278,6 +279,26 @@ document.addEventListener('DOMContentLoaded', () => {
     closeModal();
     renderPosts();
     showToast('削除しました');
+  };
+
+  window.openChat = function(chatId) {
+    if (chatId && chatId.startsWith('http')) {
+      window.open(chatId, '_blank');
+    } else if (chatId) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(chatId).then(() => {
+          showToast('連絡先(Gmail)をコピーしました！チャットの新規作成から検索してください。');
+          setTimeout(() => window.open('https://chat.google.com/', '_blank'), 2000);
+        }).catch(() => {
+          window.open('https://chat.google.com/', '_blank');
+        });
+      } else {
+        alert(`連絡先(Gmail): ${chatId}\n\nコピーしてGoogle Chatで検索してください。`);
+        window.open('https://chat.google.com/', '_blank');
+      }
+    } else {
+      window.open('https://chat.google.com/', '_blank');
+    }
   };
 
   function showToast(message) {
