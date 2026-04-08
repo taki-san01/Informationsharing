@@ -48,6 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
+    const companyFilterInput = document.getElementById('filter-company');
+    if (companyFilterInput) {
+      companyFilterInput.addEventListener('input', () => {
+        renderPosts();
+      });
+    }
+
     // Close Modal
     document.getElementById('close-modal').addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', (e) => {
@@ -85,53 +92,66 @@ document.addEventListener('DOMContentLoaded', () => {
       const type = typeInput.value;
       const isSell = type === 'sell';
       
-      let title, quantity, price, region;
+      const title = document.getElementById(isSell ? 'sell-title' : 'buy-title').value || '名称未設定';
+      const category = document.getElementById(isSell ? 'sell-category' : 'buy-category').value;
+      const quantity = document.getElementById(isSell ? 'sell-qty' : 'buy-qty').value || '不明';
+      const priceVal = document.getElementById(isSell ? 'sell-price' : 'buy-price').value;
+      const price = priceVal ? priceVal + '円' : '要相談';
+      const region = document.getElementById(isSell ? 'sell-region' : 'buy-region').value;
       
-      if (isSell) {
-        const fields = document.getElementById('sell-fields');
-        const inputs = fields.querySelectorAll('input, select');
-        title = inputs[0].value || '名称未設定';
-        quantity = inputs[3].value || '不明';
-        price = inputs[4].value ? inputs[4].value + '円' : '要相談';
-        region = inputs[5].value;
-      } else {
-        const fields = document.getElementById('buy-fields');
-        const inputs = fields.querySelectorAll('input, select');
-        title = inputs[0].value || '名称未設定';
-        quantity = inputs[2].value || '不明';
-        price = inputs[3].value ? inputs[3].value + '円' : '要相談';
-        region = inputs[4].value;
-      }
+      const capacity = isSell ? document.getElementById('sell-capacity').value : '';
+      const delivery = isSell ? document.getElementById('sell-delivery').value : '';
       
-      const selects = postForm.querySelectorAll('select');
-      const urgency = selects[selects.length - 1].value;
-      const company = document.getElementById('post-company') ? document.getElementById('post-company').value : '';
+      const urgency = document.getElementById('post-urgency').value;
+      const company = document.getElementById('post-company').value;
+      const comment = document.getElementById('post-comment').value;
+      const chat = document.getElementById('post-chat').value;
+      const email = document.getElementById('post-email').value;
       
       const newPost = {
         id: Date.now(),
         type: type,
         title: title,
+        category: category,
+        capacity: capacity,
         quantity: quantity,
         region: region,
         price: price,
+        delivery: delivery,
         urgency: urgency,
         company: company,
+        comment: comment,
+        chat: chat,
+        email: email,
         date: new Date().toISOString().split('T')[0]
       };
       
-      let localPosts = [];
-      try {
-        localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
-        localPosts.unshift(newPost);
-        localStorage.setItem('localPosts', JSON.stringify(localPosts));
-      } catch (e) {
-        alert("PCのローカルファイル(file://)から開いている場合、ブラウザのセキュリティ制限によって投稿が保存されません。GitHub PagesのURLから確認してください。");
-      }
+      const completeSubmission = () => {
+        let localPosts = [];
+        try {
+          localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
+          localPosts.unshift(newPost);
+          localStorage.setItem('localPosts', JSON.stringify(localPosts));
+        } catch (err) {
+          alert("PCのローカルファイル(file://)から開いている場合、ブラウザのセキュリティ制限によって投稿が保存されません。GitHub PagesのURLから確認してください。");
+        }
+        showToast('投稿が完了しました！');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+      };
 
-      showToast('投稿が完了しました！');
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 1500);
+      const photoInput = isSell ? document.getElementById('sell-photo') : null;
+      if (photoInput && photoInput.files && photoInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          newPost.photo = evt.target.result;
+          completeSubmission();
+        };
+        reader.readAsDataURL(photoInput.files[0]);
+      } else {
+        completeSubmission();
+      }
     });
   }
 
@@ -139,7 +159,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!postList) return;
     postList.innerHTML = '';
     
-    const filtered = postsData.filter(p => p.type === currentFilter);
+    const companyFilterInput = document.getElementById('filter-company');
+    const filterCompanyVal = companyFilterInput ? companyFilterInput.value.trim().toLowerCase() : '';
+
+    const filtered = postsData.filter(p => {
+      if (p.type !== currentFilter) return false;
+      if (filterCompanyVal && !(p.company && p.company.toLowerCase().includes(filterCompanyVal))) return false;
+      return true;
+    });
     
     if (filtered.length === 0) {
       postList.innerHTML = '<p class="text-center" style="margin-top:30px; color:#666;">該当する投稿がありません。</p>';
@@ -181,6 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const badgeText = post.type === 'sell' ? '売り' : '買い';
     const badgeClass = post.type;
 
+    const chatLink = post.chat && post.chat.startsWith('http') ? post.chat : 'https://chat.google.com/';
+
     modalBody.innerHTML = `
       <div class="card-header">
         <div>
@@ -191,16 +220,22 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <h2 style="margin: 10px 0; font-size: 1.3rem;">${post.title}</h2>
       
+      ${post.photo ? `<img src="${post.photo}" style="max-width: 100%; border-radius: 8px; margin-bottom: 12px; max-height: 250px; object-fit: contain;">` : ''}
+
       <div style="background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
-        <p style="margin-bottom: 6px;"><strong>出品者・会社名：</strong> ${post.company || '未設定'}</p>
+        <p style="margin-bottom: 6px;"><strong>出品者(会社名)：</strong> ${post.company || '未設定'}</p>
+        <p style="margin-bottom: 6px;"><strong>種類：</strong> ${post.category || '未設定'}</p>
+        ${post.capacity ? `<p style="margin-bottom: 6px;"><strong>容量：</strong> ${post.capacity}</p>` : ''}
         <p style="margin-bottom: 6px;"><strong>数量：</strong> ${post.quantity}</p>
         <p style="margin-bottom: 6px;"><strong>地域：</strong> ${post.region}</p>
         <p style="margin-bottom: 6px;"><strong>価格：</strong> ${post.price}</p>
-        <p><strong>緊急度：</strong> ${post.urgency}</p>
+        ${post.delivery ? `<p style="margin-bottom: 6px;"><strong>引渡方法：</strong> ${post.delivery}</p>` : ''}
+        <p style="margin-bottom: 6px;"><strong>緊急度：</strong> ${post.urgency}</p>
+        ${post.comment ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0;"><p style="white-space: pre-wrap;">${post.comment}</p></div>` : ''}
       </div>
       
-      <a href="#" class="contact-btn chat" onclick="event.preventDefault(); showToast('Google Chatを開きます(デモ)')">Google Chatで連絡</a>
-      <a href="#" class="contact-btn email" onclick="event.preventDefault(); showToast('メールアプリを開きます(デモ)')">メールで連絡</a>
+      <a href="${chatLink}" target="_blank" class="contact-btn chat">Google Chatで連絡</a>
+      <a href="mailto:${post.email || ''}" class="contact-btn email">メールで連絡</a>
       <button onclick="deletePost(${post.id})" class="submit-btn" style="background-color: #d32f2f; margin-top: 10px; padding: 10px; font-size: 0.9rem;">この投稿を削除する</button>
     `;
 

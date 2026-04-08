@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>投稿 - 日車協連青年部会　助け合い情報サイト</title>
+  <title>投稿 - JABRA CONNECT LINK</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
   <header>
     <div>
-      <a href="index.html" class="header-title">日車協連青年部会　助け合い情報サイト</a>
+      <a href="index.html" class="header-title">JABRA CONNECT LINK</a>
     </div>
     <nav class="header-nav">
       <a href="index.html">戻る</a>
@@ -33,11 +33,11 @@
         <div id="sell-fields">
           <div class="form-group">
             <label>商品名</label>
-            <input type="text" class="form-control" placeholder="例: ラッカーシンナー" required>
+            <input type="text" id="sell-title" class="form-control" placeholder="例: ラッカーシンナー" required>
           </div>
           <div class="form-group">
             <label>種類</label>
-            <select class="form-control">
+            <select id="sell-category" class="form-control">
               <option>シンナー</option>
               <option>塗料</option>
               <option>硬化剤</option>
@@ -49,19 +49,19 @@
           </div>
           <div class="form-group">
             <label>容量</label>
-            <input type="text" class="form-control" placeholder="例: 16L">
+            <input type="text" id="sell-capacity" class="form-control" placeholder="例: 16L">
           </div>
           <div class="form-group">
             <label>数量</label>
-            <input type="text" class="form-control" placeholder="例: 3缶">
+            <input type="text" id="sell-qty" class="form-control" placeholder="例: 3缶">
           </div>
           <div class="form-group">
             <label>価格 (円)</label>
-            <input type="number" class="form-control" placeholder="例: 5000">
+            <input type="number" id="sell-price" class="form-control" placeholder="例: 5000">
           </div>
           <div class="form-group">
             <label>地域</label>
-            <select class="form-control">
+            <select id="sell-region" class="form-control">
               <option>北海道</option>
               <option>青森県</option>
               <option>岩手県</option>
@@ -114,7 +114,7 @@
           </div>
           <div class="form-group">
             <label>引渡方法</label>
-            <select class="form-control">
+            <select id="sell-delivery" class="form-control">
               <option>直接手渡し</option>
               <option>着払い発送</option>
               <option>元払い発送</option>
@@ -123,7 +123,7 @@
           </div>
           <div class="form-group">
             <label>写真 (任意)</label>
-            <input type="file" class="form-control" accept="image/*">
+            <input type="file" id="sell-photo" class="form-control" accept="image/*">
           </div>
         </div>
 
@@ -131,11 +131,11 @@
         <div id="buy-fields" class="hidden">
           <div class="form-group">
             <label>欲しいもの (商品名など)</label>
-            <input type="text" class="form-control" placeholder="例: 塗料用シンナー">
+            <input type="text" id="buy-title" class="form-control" placeholder="例: 塗料用シンナー">
           </div>
           <div class="form-group">
             <label>種類</label>
-            <select class="form-control">
+            <select id="buy-category" class="form-control">
               <option>シンナー</option>
               <option>塗料</option>
               <option>硬化剤</option>
@@ -147,15 +147,15 @@
           </div>
           <div class="form-group">
             <label>希望数量</label>
-            <input type="text" class="form-control" placeholder="例: 1缶〜">
+            <input type="text" id="buy-qty" class="form-control" placeholder="例: 1缶〜">
           </div>
           <div class="form-group">
             <label>希望価格 (円)</label>
-            <input type="text" class="form-control" placeholder="例: 相談 (相場程度)">
+            <input type="text" id="buy-price" class="form-control" placeholder="例: 相談 (相場程度)">
           </div>
           <div class="form-group">
             <label>地域</label>
-            <select class="form-control">
+            <select id="buy-region" class="form-control">
               <option>北海道</option>
               <option>青森県</option>
               <option>岩手県</option>
@@ -215,7 +215,7 @@
         </div>
         <div class="form-group">
           <label>緊急度</label>
-          <select class="form-control">
+          <select class="form-control" id="post-urgency">
             <option>通常</option>
             <option>緊急</option>
             <option>本日中希望</option>
@@ -224,15 +224,15 @@
         </div>
         <div class="form-group">
           <label>コメント</label>
-          <textarea class="form-control" rows="3" placeholder="補足や状態など..."></textarea>
+          <textarea class="form-control" id="post-comment" rows="3" placeholder="補足や状態など..."></textarea>
         </div>
         <div class="form-group">
           <label>Google Chat 連絡先</label>
-          <input type="text" class="form-control" placeholder="アカウント名やリンク等">
+          <input type="text" class="form-control" id="post-chat" placeholder="アカウント名やリンク等">
         </div>
         <div class="form-group">
           <label>メールアドレス</label>
-          <input type="email" class="form-control" placeholder="例: user@example.com" required>
+          <input type="email" class="form-control" id="post-email" placeholder="例: user@example.com" required>
         </div>
 
         <button type="submit" class="submit-btn">投稿する</button>
@@ -241,8 +241,8 @@
     </div>
   </main>
 
-  <footer style="text-align:center; padding: 20px; font-size: 0.8rem; color: #666;">
-    &copy; 日車協連青年部会
+  <footer style="text-align:center; padding: 20px; font-size: 0.7rem; color: #666;">
+    copyright©️2026 日本自動車車体整備協同組合連合会青年部会 All rights reserved.
   </footer>
 
   <script src="assets/js/main.js"></script>
