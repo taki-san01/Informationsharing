@@ -48,12 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    const companyFilterInput = document.getElementById('filter-company');
-    if (companyFilterInput) {
-      companyFilterInput.addEventListener('input', () => {
+    const filterEls = document.querySelectorAll('.filter-select');
+    filterEls.forEach(el => {
+      el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'change', () => {
         renderPosts();
       });
-    }
+    });
 
     // Close Modal
     document.getElementById('close-modal').addEventListener('click', closeModal);
@@ -104,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const urgency = document.getElementById('post-urgency').value;
       const company = document.getElementById('post-company').value;
+      const name = document.getElementById('post-name').value;
       const comment = document.getElementById('post-comment').value;
       const chat = document.getElementById('post-chat').value;
       const email = document.getElementById('post-email').value;
@@ -120,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         delivery: delivery,
         urgency: urgency,
         company: company,
+        name: name,
         comment: comment,
         chat: chat,
         email: email,
@@ -159,12 +161,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!postList) return;
     postList.innerHTML = '';
     
+    const regionFilterInput = document.getElementById('filter-region');
+    const categoryFilterInput = document.getElementById('filter-category');
+    const urgencyFilterInput = document.getElementById('filter-urgency');
     const companyFilterInput = document.getElementById('filter-company');
+
+    const regionVal = regionFilterInput ? regionFilterInput.value : '地域: 全て';
+    const categoryVal = categoryFilterInput ? categoryFilterInput.value : '種類: 全て';
+    const urgencyVal = urgencyFilterInput ? urgencyFilterInput.value : '緊急度: 全て';
     const filterCompanyVal = companyFilterInput ? companyFilterInput.value.trim().toLowerCase() : '';
 
     const filtered = postsData.filter(p => {
       if (p.type !== currentFilter) return false;
       if (filterCompanyVal && !(p.company && p.company.toLowerCase().includes(filterCompanyVal))) return false;
+      if (regionVal !== '地域: 全て' && p.region !== regionVal) return false;
+      if (categoryVal !== '種類: 全て' && p.category !== categoryVal) return false;
+      if (urgencyVal !== '緊急度: 全て' && p.urgency !== urgencyVal) return false;
       return true;
     });
     
@@ -224,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       <div style="background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
         <p style="margin-bottom: 6px;"><strong>出品者(会社名)：</strong> ${post.company || '未設定'}</p>
+        <p style="margin-bottom: 6px;"><strong>氏名：</strong> ${post.name || '未設定'}</p>
         <p style="margin-bottom: 6px;"><strong>種類：</strong> ${post.category || '未設定'}</p>
         ${post.capacity ? `<p style="margin-bottom: 6px;"><strong>容量：</strong> ${post.capacity}</p>` : ''}
         <p style="margin-bottom: 6px;"><strong>数量：</strong> ${post.quantity}</p>
