@@ -1,43 +1,43 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 document.addEventListener('DOMContentLoaded', () => {
   const postList = document.getElementById('post-list');
   const modalOverlay = document.getElementById('post-modal');
   let postsData = [];
   let currentFilter = 'sell';
 
+  // Generate or retrieve a device ID (so users can delete their own posts)
+  const getDeviceId = () => {
+    let id = localStorage.getItem('deviceId');
+    if (!id) {
+      id = 'device_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('deviceId', id);
+    }
+    return id;
+  };
+  const myDeviceId = getDeviceId();
+
   // Fetch posts if we are on the index page
   if (postList) {
-    fetch(`data/posts.json?t=${Date.now()}`)
-      .then(res => res.json())
-      .then(data => {
-        let localPosts = [];
-        let deletedPosts = [];
-        try {
-          localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
-          deletedPosts = JSON.parse(localStorage.getItem('deletedPosts') || '[]');
-        } catch (e) {
-          console.warn("localStorage is not available", e);
-        }
-        const deletedStrs = deletedPosts.map(String);
-        postsData = [...localPosts, ...data].filter(p => !deletedStrs.includes(String(p.id)));
-        renderPosts();
-      })
-      .catch(err => {
-        console.error("Failed to load post data", err);
-        let localPosts = [];
-        try {
-          localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
-        } catch (e) {}
-        
-        if (localPosts.length > 0) {
-          let deletedPosts = [];
-          try { deletedPosts = JSON.parse(localStorage.getItem('deletedPosts') || '[]'); } catch(e){}
-          const deletedStrs = deletedPosts.map(String);
-          postsData = localPosts.filter(p => !deletedStrs.includes(String(p.id)));
-          renderPosts();
-        } else {
-          postList.innerHTML = '<p class="text-center" style="margin-top:30px;">データの読み込みに失敗しました。</p>';
-        }
+    const q = query(collection(db, "posts"), orderBy("id", "desc"));
+    onSnapshot(q, (snapshot) => {
+      postsData = [];
+      snapshot.forEach((docSnapshot) => {
+        let post = docSnapshot.data();
+        post.firestoreId = docSnapshot.id;
+        postsData.push(post);
       });
+      renderPosts();
+    }, (error) => {
+      console.error("Firebase fetch error: ", error);
+      postList.innerHTML = '<p class="text-center" style="margin-top:30px; color:red;">データベース接続エラー。環境設定（firebase-config.js）を確認するか、Firebaseの権限設定が完了しているか確認してください。</p>';
+    });
 
     // Sub-tab switching on main page
     const tabs = document.querySelectorAll('.tab-btn');
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    postForm.addEventListener('submit', (e) => {
+    postForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const type = typeInput.value;
@@ -127,26 +127,32 @@ document.addEventListener('DOMContentLoaded', () => {
         comment: comment,
         chat: chat,
         email: email,
+        ownerId: myDeviceId,
         date: new Date().toISOString().split('T')[0]
       };
       
-      const completeSubmission = () => {
-        let localPosts = [];
+      const completeSubmission = async () => {
         try {
-          localPosts = JSON.parse(localStorage.getItem('localPosts') || '[]');
-          localPosts.unshift(newPost);
-          localStorage.setItem('localPosts', JSON.stringify(localPosts));
+          const submitBtn = postForm.querySelector('.submit-btn');
+          submitBtn.disabled = true;
+          submitBtn.textContent = '送信中...';
+          await addDoc(collection(db, "posts"), newPost);
+          showToast('投稿が完了しました！');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
         } catch (err) {
-          alert("PCのローカルファイル(file://)から開いている場合、ブラウザのセキュリティ制限によって投稿が保存されません。GitHub PagesのURLから確認してください。");
+          console.error("Error adding document: ", err);
+          alert("データベースの保存に失敗しました。firebase-config.js の設定等を確認してください。");
+          const submitBtn = postForm.querySelector('.submit-btn');
+          submitBtn.disabled = false;
+          submitBtn.textContent = '投稿する';
         }
-        showToast('投稿が完了しました！');
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 1500);
       };
 
       const photoInput = document.getElementById('post-photo');
       if (photoInput && photoInput.files && photoInput.files[0]) {
+        // MVC用としてBase64で保存
         const reader = new FileReader();
         reader.onload = function(evt) {
           newPost.photo = evt.target.result;
@@ -252,11 +258,11 @@ document.addEventListener('DOMContentLoaded', () => {
       
       <button onclick="openChat('${post.chat || ''}')" class="contact-btn chat" style="border:none; cursor:pointer;">Google Chatで連絡</button>
       <a href="mailto:${post.email || ''}?subject=${emailSubject}&body=${emailBody}" class="contact-btn email">メールで連絡</a>
-      <button onclick="deletePost(${post.id})" class="submit-btn" style="background-color: #d32f2f; margin-top: 10px; padding: 10px; font-size: 0.9rem;">この投稿を削除する</button>
+      ${post.ownerId === myDeviceId ? `<button onclick="deletePost('${post.firestoreId}')" class="submit-btn" style="background-color: #d32f2f; margin-top: 10px; padding: 10px; font-size: 0.9rem;">この投稿を削除する</button>` : ''}
     `;
 
     modalOverlay.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
   }
 
   function closeModal() {
@@ -264,23 +270,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.overflow = '';
   }
 
-  window.deletePost = function(id) {
+  window.deletePost = async function(firestoreId) {
     if(!confirm("本当にこの投稿を削除しますか？")) return;
-    
     try {
-      let deleted = JSON.parse(localStorage.getItem('deletedPosts') || '[]');
-      deleted.push(id);
-      localStorage.setItem('deletedPosts', JSON.stringify(deleted));
-      
-      let local = JSON.parse(localStorage.getItem('localPosts') || '[]');
-      local = local.filter(p => p.id !== id);
-      localStorage.setItem('localPosts', JSON.stringify(local));
-    } catch(e) {}
-
-    postsData = postsData.filter(p => Number(p.id) !== Number(id));
-    closeModal();
-    renderPosts();
-    showToast('削除しました');
+      await deleteDoc(doc(db, "posts", firestoreId));
+      closeModal();
+      showToast('削除しました');
+    } catch(err) {
+      console.error(err);
+      showToast('削除に失敗いたしました。');
+    }
   };
 
   window.openChat = function(chatId) {
