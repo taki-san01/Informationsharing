@@ -154,13 +154,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const photoInput = document.getElementById('post-photo');
       if (photoInput && photoInput.files && photoInput.files[0]) {
-        // MVC用としてBase64で保存
+        const file = photoInput.files[0];
         const reader = new FileReader();
         reader.onload = function(evt) {
-          newPost.photo = evt.target.result;
-          completeSubmission();
+          const img = new Image();
+          img.onload = function() {
+            // 画像を圧縮（最大幅または高さを800px以内に）
+            const canvas = document.createElement('canvas');
+            const MAX_SIZE = 800;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_SIZE) {
+                height *= MAX_SIZE / width;
+                width = MAX_SIZE;
+              }
+            } else {
+              if (height > MAX_SIZE) {
+                width *= MAX_SIZE / height;
+                height = MAX_SIZE;
+              }
+            }
+            
+            canvas.width = Math.floor(width);
+            canvas.height = Math.floor(height);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // JPEGで画質を70%まで落としてBase64化
+            newPost.photo = canvas.toDataURL('image/jpeg', 0.7);
+            completeSubmission();
+          };
+          img.src = evt.target.result;
         };
-        reader.readAsDataURL(photoInput.files[0]);
+        reader.readAsDataURL(file);
       } else {
         completeSubmission();
       }
